@@ -8,6 +8,7 @@
 
 #include "gd32f1x0_it.h"
 #include "main.h"
+#include "motor.h"
 
 /*!
     \brief  systick interrupt count variable is used to
@@ -75,6 +76,8 @@ void PendSV_Handler(void) {
     \brief this function handles SysTick exception
 */
 void SysTick_Handler(void) {
+
+    motor_update_cnt();
     /* update millisecond delay counter */
     delay_decrement();
     systick_counter++;
@@ -94,7 +97,8 @@ void USART0_IRQHandler(void) {
     if (RESET != usart_interrupt_flag_get(USART0, USART_INT_FLAG_RBNE)) {
         /* receive, process and unzip data */
         unsigned char rcv_data = usart_data_receive(USART0);
-        mdtp_receive_handler(rcv_data);
+        //mdtp_receive_handler(rcv_data);
+        cmd_receive_hander(rcv_data);
     }
 }
 
@@ -110,10 +114,10 @@ void TIMER2_IRQHandler(void) {
         float u, v, w, angle = (float) encoder_get_electronic_angle();
 
         /* Clarke inverse transform and SVPWM modulation */
-        if (phase_sequence == 0)
-            foc_calculate_dutycycle(angle, 0, FOC_Struct.user_expect, &u, &v, &w);
+        if (motor.phase_sequence == 0)
+            foc_calculate_dutycycle(angle, 0, motor.FOC_Struct.user_expect, &u, &v, &w);
         else
-            foc_calculate_dutycycle(angle, 0, FOC_Struct.user_expect, &v, &u, &w);
+            foc_calculate_dutycycle(angle, 0, motor.FOC_Struct.user_expect, &v, &u, &w);
         update_pwm_dutycycle(u, v, w);
     }
 }
@@ -127,12 +131,12 @@ void TIMER13_IRQHandler(void) {
         timer_interrupt_flag_clear(TIMER13, TIMER_INT_UP);
 
         /* judge whether angle closed-loop control is required */
-        if (pid_control_mode_flag == ANGLE_LOOP_CONTROL)
+        if (motor.FOC_Struct.control_mod == MCT_angle)
             /* the calculated value of the angle loop is taken as the expected value of the speed loop */
-            speed_pid_handler.expect =
-                pid_calculate_result((PID_Structure_t *) &angle_pid_handler, FOC_Struct.mechanical_angle);
+            motor.speed_pid_handler.expect =
+                pid_calculate_result((PID_Structure_t *) &motor.angle_pid_handler, motor.FOC_Struct.mechanical_angle);
 
         /* calculate the speed loop PID and obtain the calculated value */
-        FOC_Struct.user_expect = pid_calculate_result((PID_Structure_t *) &speed_pid_handler, FOC_Struct.rotate_speed);
+        motor.FOC_Struct.user_expect = pid_calculate_result((PID_Structure_t *) &motor.speed_pid_handler, motor.FOC_Struct.rotate_speed);
     }
 }

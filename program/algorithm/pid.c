@@ -7,49 +7,46 @@
  ******************************************************************************/
 
 #include "pid.h"
+#include "motor.h"
 #include "fast_math.h"
 #include "system.h"
 
-/*!
-    \brief flag variable for PID parameter availability
-*/
-unsigned char pid_parameter_available_flag = 1;
-/*!
-    \brief flag variable of PID closed loop mode
-*/
-volatile unsigned char pid_control_mode_flag = 0;
-/*!
-    \brief algorithm handler of PID speed loop
-*/
-volatile PID_Structure_t speed_pid_handler;
-/*!
-    \brief algorithm handler of PID angle loop
-*/
-volatile PID_Structure_t angle_pid_handler;
+PID_Structure_t* pid_get_speed_pid(void)
+{
+    return &motor.speed_pid_handler;
+}
 
+PID_Structure_t* pid_get_angle_pid(void)
+{
+    return &motor.angle_pid_handler;
+}
 /*!
     \brief configure pid loop parameters
 */
 void pid_config(unsigned char mode) {
     /* clear the value of the PID handler */
-    user_memset((void *) &speed_pid_handler, 0x00, sizeof(PID_Structure_t));
-    user_memset((void *) &angle_pid_handler, 0x00, sizeof(PID_Structure_t));
+    user_memset((void *) &motor.speed_pid_handler, 0x00, sizeof(PID_Structure_t));
+    user_memset((void *) &motor.angle_pid_handler, 0x00, sizeof(PID_Structure_t));
 
     /* update the PID closed loop flag byte */
-    pid_control_mode_flag = mode;
+    motor.FOC_Struct.control_mod = mode;
 
     /* set maximum and minimum output torque */
-    speed_pid_handler.maximum = 1.0f;
-    speed_pid_handler.minimum = -1.0f;
+    motor.speed_pid_handler.maximum = 1.0f;
+    motor.speed_pid_handler.minimum = -1.0f;
 
-    speed_pid_handler.kp = 0.06f;
-    speed_pid_handler.ki = 0.08f;
-    speed_pid_handler.kd = 0.01f;
-    speed_pid_handler.sum_maximum = 0;
+    motor.speed_pid_handler.kp = 0.06f;
+    motor.speed_pid_handler.ki = 0.04f;
+    motor.speed_pid_handler.kd = 0.02f;
+    motor.speed_pid_handler.sum_maximum = 500;
 
     /* set maximum and minimum output speed */
-    angle_pid_handler.maximum = 100.0f;
-    angle_pid_handler.minimum = -100.0f;
+    motor.angle_pid_handler.maximum = 100.0f;
+    motor.angle_pid_handler.minimum = -100.0f;
+
+    motor.angle_pid_handler.kp = 10.0f;
+    motor.angle_pid_handler.ki = 0.4f;
+    motor.angle_pid_handler.kd = 0.1f;
 }
 
 /*!

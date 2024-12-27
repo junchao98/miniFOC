@@ -17,31 +17,31 @@ void report_local_variable(void) {
     unsigned char buffer[8] = {0, 0, 0, 0, 0, 0, 0, 0};
 
     /* compress the angle deviation and motor phase sequence into a 32-bit integer */
-    upload_var[0] = (machine_angle_offset << 16) | phase_sequence | foc_parameter_available_flag << 1
-        | pid_parameter_available_flag << 2;
+    upload_var[0] = (machine_angle_offset << 16) | motor.phase_sequence | motor.foc_parameter_available_flag << 1
+        | motor.pid_parameter_available_flag << 2;
 
     /* converts user expect value to an integer */
-    switch (pid_control_mode_flag) {
+    switch (motor.FOC_Struct.control_mod) {
         default:
-        case TORQUE_LOOP_CONTROL:upload_var[1] = float_to_int32(FOC_Struct.user_expect);
+        case TORQUE_LOOP_CONTROL:upload_var[1] = float_to_int32(motor.FOC_Struct.user_expect);
             break;
-        case SPEED_LOOP_CONTROL:upload_var[1] = float_to_int32(speed_pid_handler.expect);
+        case SPEED_LOOP_CONTROL:upload_var[1] = float_to_int32(motor.speed_pid_handler.expect);
             break;
-        case ANGLE_LOOP_CONTROL:upload_var[1] = float_to_int32(angle_pid_handler.expect);
+        case ANGLE_LOOP_CONTROL:upload_var[1] = float_to_int32(motor.angle_pid_handler.expect);
             break;
     }
 
     /* converts speed pid parameters to an integer */
-    upload_var[2] = float_to_int32(speed_pid_handler.kp);
-    upload_var[3] = float_to_int32(speed_pid_handler.ki);
-    upload_var[4] = float_to_int32(speed_pid_handler.kd);
-    upload_var[5] = float_to_int32(speed_pid_handler.sum_maximum);
+    upload_var[2] = float_to_int32(motor.speed_pid_handler.kp);
+    upload_var[3] = float_to_int32(motor.speed_pid_handler.ki);
+    upload_var[4] = float_to_int32(motor.speed_pid_handler.kd);
+    upload_var[5] = float_to_int32(motor.speed_pid_handler.sum_maximum);
 
     /* converts angle pid parameters to an integer */
-    upload_var[6] = float_to_int32(angle_pid_handler.kp);
-    upload_var[7] = float_to_int32(angle_pid_handler.ki);
-    upload_var[8] = float_to_int32(angle_pid_handler.kd);
-    upload_var[9] = float_to_int32(angle_pid_handler.sum_maximum);
+    upload_var[6] = float_to_int32(motor.angle_pid_handler.kp);
+    upload_var[7] = float_to_int32(motor.angle_pid_handler.ki);
+    upload_var[8] = float_to_int32(motor.angle_pid_handler.kd);
+    upload_var[9] = float_to_int32(motor.angle_pid_handler.sum_maximum);
 
     for (unsigned char counter = 0; counter < 5; ++counter) {
         /* separates 32-bit integer data into 8-bit integers */
@@ -70,8 +70,8 @@ void report_angle_speed(void) {
     unsigned char buffer[8] = {0, 0, 0, 0, 0, 0, 0, 0};
 
     /* converts velocity and angle floating point data to an integer */
-    unsigned int velocity = float_to_int32(FOC_Struct.rotate_speed);
-    unsigned int angle = float_to_int32(FOC_Struct.mechanical_angle);
+    unsigned int velocity = float_to_int32(motor.FOC_Struct.rotate_speed);
+    unsigned int angle = float_to_int32(motor.FOC_Struct.mechanical_angle);
 
     /* separates 32-bit velocity integer into 8-bit integers */
     buffer[0] = (unsigned char) ((velocity >> 24UL) & 0x000000ffUL);

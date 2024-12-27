@@ -9,7 +9,17 @@
 
 #ifndef MINIFOC_ALGORITHM_FOC_H_
 #define MINIFOC_ALGORITHM_FOC_H_
+#include <stdint.h>
 
+/**
+ *  FOC modulation type
+ */
+enum FOCModulationType {
+  SinePWM            = 0x00,     //!< Sinusoidal PWM modulation
+  SpaceVectorPWM     = 0x01,     //!< Space vector modulation method
+  Trapezoid_120      = 0x02,     
+  Trapezoid_150      = 0x03,     
+};
 /*!
   \struct FOC_Structure_t
   \brief  structure of FOC algorithm
@@ -18,6 +28,9 @@ typedef struct {
     float mechanical_angle;     ///< mechanical angle read form encoder
     float rotate_speed;         ///< motor rotate speed calculate from timer
     float user_expect;          ///< user expect value of miniFOC
+    float vbus;                 ///< motor voltage
+    unsigned char pwmmod;
+    unsigned char control_mod;
 } FOC_Structure_t;
 
 /*! \brief mechanical angle conversion factor */
@@ -27,9 +40,6 @@ typedef struct {
 /*! \brief mechanical rotate speed conversion factor */
 #define SPEED_COEFFICIENT       ((6.2831852f * TIM13_FREQUENCY) / ENCODER_RESO)
 
-extern unsigned char foc_parameter_available_flag;
-extern volatile unsigned char phase_sequence;
-extern volatile FOC_Structure_t FOC_Struct;
 void foc_calculate_dutycycle(float elect_angle, float d, float q, float *u, float *v, float *w);
 void foc_calibrate_phase(void);
 

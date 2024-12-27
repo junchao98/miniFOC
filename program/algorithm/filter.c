@@ -11,12 +11,8 @@
 #include "filter.h"
 #include "system.h"
 #include "foc.h"
+#include "motor.h"
 #include "config.h"
-
-/*!
-    \brief motor rotation speed low pass filter handle
-*/
-volatile Filter_Structure_t velocity_filter;
 
 /*!
     \brief     configure low-pass filter parameters
@@ -43,7 +39,7 @@ void filter_coefficient_config(Filter_Structure_t *param, float cutoff_freq, flo
     \brief configure low-pass filter parameters
 */
 void filter_config(void) {
-    filter_coefficient_config((Filter_Structure_t *) &velocity_filter,
+    filter_coefficient_config((Filter_Structure_t *) &motor.velocity_filter,
                               TIM13_FREQUENCY, SPEED_UP_FREQ, SPEED_COEFFICIENT);
 }
 

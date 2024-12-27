@@ -9,23 +9,11 @@
 
 #include "foc.h"
 #include "config.h"
+#include "motor.h"
 #include "fast_math.h"
 #include "encoder.h"
 #include "system.h"
 #include "timer.h"
-
-/*!
-    \brief FOC handler
-*/
-volatile FOC_Structure_t FOC_Struct;
-/*!
-    \brief motor phase sequence flag variable
-*/
-volatile unsigned char phase_sequence = 0;
-/*!
-    \brief flag variable for FOC parameter availability
-*/
-unsigned char foc_parameter_available_flag = 1;
 
 /*!
     \brief automatic phase sequence detection and correction
@@ -80,9 +68,9 @@ void foc_calibrate_phase(void) {
     delayms(300);
 
     if (positive_counter >= 75)
-        phase_sequence = 0;
+        motor.phase_sequence = 0;
     else if (positive_counter < 25)
-        phase_sequence = 1;
+        motor.phase_sequence = 1;
     else
         while (1);
 }
@@ -146,8 +134,8 @@ void foc_calculate_dutycycle(float elect_angle, float d, float q, float *u, floa
     }
 
     /* calculate the duty cycle in center alignment mode */
-    *u = (Ta / VBUS) * 0.5f + 0.5f;
-    *v = (Tb / VBUS) * 0.5f + 0.5f;
-    *w = (Tc / VBUS) * 0.5f + 0.5f;
+    *u = (Ta / motor.FOC_Struct.vbus) * 0.5f + 0.5f;
+    *v = (Tb / motor.FOC_Struct.vbus) * 0.5f + 0.5f;
+    *w = (Tc / motor.FOC_Struct.vbus) * 0.5f + 0.5f;
 #endif
 }

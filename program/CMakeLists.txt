@@ -16,16 +16,16 @@ project(miniFOC C ASM)
 set(CMAKE_C_STANDARD 11)
 
 add_compile_options(-mfloat-abi=soft)
-add_compile_options(-mcpu=cortex-m3 -mthumb -mthumb-interwork -specs=nosys.specs)
+add_compile_options(-mcpu=cortex-m3 -mthumb -mthumb-interwork -specs=nano.specs)
 add_compile_options(-ffunction-sections -fdata-sections -fno-common -fmessage-length=0)
 add_compile_options(-O2)
 
-include_directories(system library/inc hardware ./ algorithm)
+include_directories(system library/inc hardware ./ algorithm communication)
 
 add_definitions(-DUSE_STDPERIPH_DRIVER -DGD32F130_150)
 
 file(GLOB_RECURSE SOURCES "library/src/*.c" "system/*.c" "main.c"
-        "system/startup_gd32f130.s" "hardware/*.c" "algorithm/*.c")
+        "system/startup_gd32f130.s" "hardware/*.c" "algorithm/*.c" "communication/*.c")
 
 set(LINKER_SCRIPT ${CMAKE_SOURCE_DIR}/system/gd32f130g6u6.ld)
 
@@ -35,5 +35,5 @@ add_link_options(-T ${LINKER_SCRIPT})
 add_executable(${PROJECT_NAME}.elf ${SOURCES} ${LINKER_SCRIPT})
 set(HEX_FILE ${PROJECT_BINARY_DIR}/${PROJECT_NAME}.hex)
 add_custom_command(TARGET ${PROJECT_NAME}.elf POST_BUILD
-        COMMAND ${CMAKE_OBJCOPY} -Oihex $<TARGET_FILE:${PROJECT_NAME}.elf> ${HEX_FILE}
+        COMMAND ${CMAKE_OBJCOPY} -O binary $<TARGET_FILE:${PROJECT_NAME}.elf> ${HEX_FILE}
         COMMENT "Building ${HEX_FILE}")

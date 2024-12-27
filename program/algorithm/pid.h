@@ -10,6 +10,8 @@
 #ifndef MINIFOC_ALGORITHM_PID_H_
 #define MINIFOC_ALGORITHM_PID_H_
 
+#include <stdint.h>
+
 /*! \brief torque loop control mode */
 #define TORQUE_LOOP_CONTROL     1
 /*! \brief speed loop control mode */
@@ -33,11 +35,17 @@ typedef struct {
     float last_error;   ///< error value of previous calculation in PID
 } PID_Structure_t;
 
-extern unsigned char pid_parameter_available_flag;
-extern volatile unsigned char pid_control_mode_flag;
-extern volatile PID_Structure_t speed_pid_handler;
-extern volatile PID_Structure_t angle_pid_handler;
+enum MotionControlType {
+  MCT_torque            = 0x00,     //!< Torque control
+  MCT_velocity          = 0x01,     //!< Velocity motion control
+  MCT_angle             = 0x02,     //!< Position/angle motion control
+  MCT_velocity_openloop = 0x03,
+  MCT_angle_openloop    = 0x04
+};
+
 void pid_config(unsigned char mode);
 float pid_calculate_result(PID_Structure_t *pid_handler, float collect);
+PID_Structure_t* pid_get_speed_pid(void);
+PID_Structure_t* pid_get_angle_pid(void);
 
 #endif //MINIFOC_ALGORITHM_PID_H_

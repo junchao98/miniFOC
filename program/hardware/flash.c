@@ -24,17 +24,17 @@
     \brief program all parameters to flash
 */
 void flash_write_parameters(void) {
-    unsigned int buffer[11] = {machine_angle_offset, phase_sequence, 0x00000000UL, 0x00000000UL, 0x00000000UL,
+    unsigned int buffer[11] = {machine_angle_offset, motor.phase_sequence, 0x00000000UL, 0x00000000UL, 0x00000000UL,
                                0x00000000UL, 0x00000000UL, 0x00000000UL, 0x00000000UL, 0x00000000UL, 0x00000000UL};
-    buffer[2] = float_to_int32(speed_pid_handler.kp);
-    buffer[3] = float_to_int32(speed_pid_handler.ki);
-    buffer[4] = float_to_int32(speed_pid_handler.kd);
-    buffer[5] = float_to_int32(speed_pid_handler.sum_maximum);
-    buffer[6] = float_to_int32(angle_pid_handler.kp);
-    buffer[7] = float_to_int32(angle_pid_handler.ki);
-    buffer[8] = float_to_int32(angle_pid_handler.kd);
-    buffer[9] = float_to_int32(angle_pid_handler.sum_maximum);
-    if (pid_parameter_available_flag == 1)
+    buffer[2] = float_to_int32(motor.speed_pid_handler.kp);
+    buffer[3] = float_to_int32(motor.speed_pid_handler.ki);
+    buffer[4] = float_to_int32(motor.speed_pid_handler.kd);
+    buffer[5] = float_to_int32(motor.speed_pid_handler.sum_maximum);
+    buffer[6] = float_to_int32(motor.angle_pid_handler.kp);
+    buffer[7] = float_to_int32(motor.angle_pid_handler.ki);
+    buffer[8] = float_to_int32(motor.angle_pid_handler.kd);
+    buffer[9] = float_to_int32(motor.angle_pid_handler.sum_maximum);
+    if (motor.pid_parameter_available_flag == 1)
         buffer[10] = 0xA5A5A5A5UL;
     flash_erase_page();
     flash_program_word(0x00000000UL, buffer, 11);
@@ -45,29 +45,29 @@ void flash_write_parameters(void) {
 */
 void flash_read_parameters(void) {
     machine_angle_offset = flash_read_word(0x00000000UL);
-    phase_sequence = flash_read_word(0x00000004UL);
-    speed_pid_handler.kp = int32_to_float(flash_read_word(0x00000008UL));
-    speed_pid_handler.ki = int32_to_float(flash_read_word(0x00000012UL));
-    speed_pid_handler.kd = int32_to_float(flash_read_word(0x00000016UL));
-    speed_pid_handler.sum_maximum = int32_to_float(flash_read_word(0x00000020UL));
-    angle_pid_handler.kp = int32_to_float(flash_read_word(0x00000024UL));
-    angle_pid_handler.ki = int32_to_float(flash_read_word(0x00000028UL));
-    angle_pid_handler.kd = int32_to_float(flash_read_word(0x00000032UL));
-    angle_pid_handler.sum_maximum = int32_to_float(flash_read_word(0x00000036UL));
-    if (machine_angle_offset > 4096 || phase_sequence > 1)
-        foc_parameter_available_flag = 0;
+    motor.phase_sequence = flash_read_word(0x00000004UL);
+    motor.speed_pid_handler.kp = int32_to_float(flash_read_word(0x00000008UL));
+    motor.speed_pid_handler.ki = int32_to_float(flash_read_word(0x00000012UL));
+    motor.speed_pid_handler.kd = int32_to_float(flash_read_word(0x00000016UL));
+    motor.speed_pid_handler.sum_maximum = int32_to_float(flash_read_word(0x00000020UL));
+    motor.angle_pid_handler.kp = int32_to_float(flash_read_word(0x00000024UL));
+    motor.angle_pid_handler.ki = int32_to_float(flash_read_word(0x00000028UL));
+    motor.angle_pid_handler.kd = int32_to_float(flash_read_word(0x00000032UL));
+    motor.angle_pid_handler.sum_maximum = int32_to_float(flash_read_word(0x00000036UL));
+    if (machine_angle_offset > 4096 || motor.phase_sequence > 1)
+        motor.foc_parameter_available_flag = 0;
     if (flash_read_word(0x00000040UL) != 0xA5A5A5A5UL)
-        pid_parameter_available_flag = 0;
+        motor.pid_parameter_available_flag = 0;
 
-    JUDGE_AVAILABLE(speed_pid_handler.kp, 10.0f, -10.0f);
-    JUDGE_AVAILABLE(speed_pid_handler.ki, 10.0f, -10.0f);
-    JUDGE_AVAILABLE(speed_pid_handler.kd, 10.0f, -10.0f);
-    JUDGE_AVAILABLE(speed_pid_handler.sum_maximum, 10.0f, -10.0f);
+    JUDGE_AVAILABLE(motor.speed_pid_handler.kp, 10.0f, -10.0f);
+    JUDGE_AVAILABLE(motor.speed_pid_handler.ki, 10.0f, -10.0f);
+    JUDGE_AVAILABLE(motor.speed_pid_handler.kd, 10.0f, -10.0f);
+    JUDGE_AVAILABLE(motor.speed_pid_handler.sum_maximum, 10.0f, -10.0f);
 
-    JUDGE_AVAILABLE(angle_pid_handler.kp, 10.0f, -10.0f);
-    JUDGE_AVAILABLE(angle_pid_handler.ki, 10.0f, -10.0f);
-    JUDGE_AVAILABLE(angle_pid_handler.kd, 10.0f, -10.0f);
-    JUDGE_AVAILABLE(angle_pid_handler.sum_maximum, 10.0f, -10.0f);
+    JUDGE_AVAILABLE(motor.angle_pid_handler.kp, 10.0f, -10.0f);
+    JUDGE_AVAILABLE(motor.angle_pid_handler.ki, 10.0f, -10.0f);
+    JUDGE_AVAILABLE(motor.angle_pid_handler.kd, 10.0f, -10.0f);
+    JUDGE_AVAILABLE(motor.angle_pid_handler.sum_maximum, 10.0f, -10.0f);
 }
 
 /*!

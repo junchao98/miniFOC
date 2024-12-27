@@ -10,6 +10,7 @@
 #include "encoder.h"
 #include "config.h"
 #include "filter.h"
+#include "motor.h"
 #include "foc.h"
 #include "gd32f1x0.h"
 #include "spi.h"
@@ -95,7 +96,7 @@ float encoder_get_electronic_angle(void) {
   unsigned short tmp_mechanical_angle = encoder_get_mechanical_angle();
 
   /* calculate and update the mechanical angle and electric angle */
-  FOC_Struct.mechanical_angle =
+  motor.FOC_Struct.mechanical_angle =
       (float)tmp_mechanical_angle * MECHANGLE_COEFFICIENT;
   float electric_angle =
       (float)(tmp_mechanical_angle % (ENCODER_RESO / POLAR_PAIRS)) *
@@ -113,8 +114,8 @@ void encoder_update_speed(void) {
 
   /* send it to low-pass filter for filtering to prevent PID high-frequency
    * oscillation */
-  FOC_Struct.rotate_speed = filter_update_value(
-      (Filter_Structure_t *)&velocity_filter, tmp_mechanical_angle_velocity);
+  motor.FOC_Struct.rotate_speed = filter_update_value(
+      (Filter_Structure_t *)&motor.velocity_filter, tmp_mechanical_angle_velocity);
   systick_mechanical_angle_last = total_machine_angle;
 }
 

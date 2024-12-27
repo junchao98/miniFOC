@@ -20,7 +20,6 @@ typedef struct {
     float current_result;   ///< current calculation results of low-pass filter
 } Filter_Structure_t;
 
-extern volatile Filter_Structure_t velocity_filter;
 float filter_update_value(Filter_Structure_t *param, short value);
 void filter_config(void);
 

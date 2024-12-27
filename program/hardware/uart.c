@@ -27,8 +27,59 @@ volatile static unsigned char mdtp_receive_number_counter = 0;
 /*!
     \brief medium capacity transport protocol receive buffer array
 */
+
+typedef enum {
+    UART_CMD_IDLE = 0,        // 空闲状态，等待命令接收
+    UART_CMD_RECEIVING,       // 正在接收命令
+    UART_CMD_RECEIVED,        // 命令接收完成
+    UART_CMD_PROCESSING,      // 正在处理接收到的命令
+    UART_CMD_PROCESSED,       // 命令处理完成
+    UART_CMD_ERROR            // 命令接收或处理过程中出现错误
+} uart_cmd_st;
+
 static unsigned char mdtp_receive_data_buffer[10] = {0};
 
+#define CMD_BUFFER_SIZE 32
+static unsigned char cmd_buffer[CMD_BUFFER_SIZE] = {0};
+uint8_t cmd_status = UART_CMD_IDLE;
+uint8_t cmd_idx = 0;
+
+void cmd_receive_hander(uint8_t data)
+{
+    if(cmd_status == UART_CMD_IDLE || cmd_status == UART_CMD_PROCESSED){
+        cmd_status = UART_CMD_RECEIVING;
+        cmd_buffer[cmd_idx++] = data;
+    }else if (cmd_status == UART_CMD_RECEIVING){
+        cmd_buffer[cmd_idx++] = data;
+        if(data == '\n'){
+            cmd_status = UART_CMD_RECEIVED;
+            cmd_idx = 0;
+        }
+        if(cmd_idx == CMD_BUFFER_SIZE){
+            cmd_status = UART_CMD_ERROR;
+            cmd_idx = 0;
+        }
+    }else if(cmd_status == UART_CMD_ERROR){
+        if(data == '\n'){
+            cmd_status = UART_CMD_IDLE;
+        }
+    }
+}
+
+uint8_t cmd_receive_finish(void)
+{
+    return cmd_status == UART_CMD_RECEIVED;
+}
+
+void cmd_process_finish(void)
+{
+    cmd_status = UART_CMD_PROCESSED;
+}
+
+char* cmd_get_cmd(void)
+{
+    return  cmd_buffer;
+}
 /*!
     \brief     medium capacity data transmission protocol unpacking handler
     \param[in] data: data received from UART peripheral
@@ -137,6 +188,20 @@ void mdtp_data_transmit(unsigned char pid, const unsigned char *buffer) {
     }
 }
 
+void uart_sendbyte_ctx(int x, void *ctx)
+{
+    usart_data_transmit(USART0, (uint8_t) x);
+    while (RESET ==usart_flag_get(USART0, USART_FLAG_TBE));
+}
+/*!
+    \brief     UART send single byte macro
+    \param[in] x: byte to be send from UART
+*/
+void uart_sendbyte(uint8_t x)
+{
+    usart_data_transmit(USART0, (uint8_t) x);
+    while (RESET ==usart_flag_get(USART0, USART_FLAG_TBE));
+}
 /*!
     \brief configure uart0 periph and its gpios
 */

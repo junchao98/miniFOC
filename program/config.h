@@ -10,7 +10,7 @@
 #define MINIFOC__CONFIG_H_
 
 /*! \brief bus voltage is 8.0V */
-#define VBUS            8.0f
+#define VBUS            10.0f
 /*! \brief set BLDC polar pairs to 7 */
 #define POLAR_PAIRS     7
 /*! \brief SC60228 resolution is 2^8 = 4096 */
@@ -21,7 +21,7 @@
 #define USE_SVPWM       1
 
 /*! \brief set UART baud rate to 512000 */
-#define UART_BAUDRATE   512000
+#define UART_BAUDRATE   115200
 /*! \brief set PWM frequency to 20kHz */
 #define PWM_FREQUENCY   20
 /*! \brief set FOC loop frequency to 8kHz */

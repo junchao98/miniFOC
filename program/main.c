@@ -18,7 +18,7 @@
       3 disable the motor                        \n
       4 return current parameters
 */
-static volatile unsigned char minifoc_fsm_state = 0;
+unsigned char minifoc_fsm_state = 0;
 
 /*!
     \brief     user callback function for unpacking completion of medium capacity transport protocol
@@ -36,12 +36,12 @@ void mdtp_callback_handler(unsigned char pid, const unsigned char *data) {
                 break;
 
             case 0x1E:
-                if (foc_parameter_available_flag == 1) {
+                if (motor.foc_parameter_available_flag == 1) {
                     /* 0x1E used to enable the motor */
                     minifoc_fsm_state = 2;
 
                     /* configure pid parameters for (torque/speed/angle) loop */
-                    if (pid_parameter_available_flag == 1)
+                    if (motor.pid_parameter_available_flag == 1)
                         pid_config(data[1]);
                     else
                         pid_config(TORQUE_LOOP_CONTROL);
@@ -56,66 +56,66 @@ void mdtp_callback_handler(unsigned char pid, const unsigned char *data) {
             case 0x3C:
                 /* 0x3C used to set user expect */
                 receive_int32 = (data[4] << 24) | (data[5] << 16) | (data[6] << 8) | data[7];
-                if (pid_parameter_available_flag == 1) {
-                    switch (pid_control_mode_flag) {
+                if (motor.pid_parameter_available_flag == 1) {
+                    switch (motor.FOC_Struct.control_mod) {
                         default:
-                        case TORQUE_LOOP_CONTROL:FOC_Struct.user_expect = int32_to_float(receive_int32);
+                        case MCT_torque:motor.FOC_Struct.user_expect = int32_to_float(receive_int32);
                             break;
-                        case SPEED_LOOP_CONTROL:speed_pid_handler.expect = int32_to_float(receive_int32);
+                        case MCT_velocity:motor.speed_pid_handler.expect = int32_to_float(receive_int32);
                             break;
-                        case ANGLE_LOOP_CONTROL:angle_pid_handler.expect = int32_to_float(receive_int32);
+                        case MCT_angle:motor.angle_pid_handler.expect = int32_to_float(receive_int32);
                             break;
                     }
                 } else
-                    FOC_Struct.user_expect = int32_to_float(receive_int32);
+                    motor.FOC_Struct.user_expect = int32_to_float(receive_int32);
                 break;
 
             case 0x4B:
                 /* 0x4D used to set speed pid kp */
                 receive_int32 = (data[4] << 24) | (data[5] << 16) | (data[6] << 8) | data[7];
-                speed_pid_handler.kp = int32_to_float(receive_int32);
+                motor.speed_pid_handler.kp = int32_to_float(receive_int32);
                 break;
 
             case 0x5A:
                 /* 0x5A used to set speed pid ki */
                 receive_int32 = (data[4] << 24) | (data[5] << 16) | (data[6] << 8) | data[7];
-                speed_pid_handler.ki = int32_to_float(receive_int32);
+                motor.speed_pid_handler.ki = int32_to_float(receive_int32);
                 break;
 
             case 0x69:
                 /* 0x69 used to set speed pid kd */
                 receive_int32 = (data[4] << 24) | (data[5] << 16) | (data[6] << 8) | data[7];
-                speed_pid_handler.kd = int32_to_float(receive_int32);
+                motor.speed_pid_handler.kd = int32_to_float(receive_int32);
                 break;
 
             case 0x78:
                 /* 0x78 used to set speed pid summary maximum */
                 receive_int32 = (data[4] << 24) | (data[5] << 16) | (data[6] << 8) | data[7];
-                speed_pid_handler.sum_maximum = int32_to_float(receive_int32);
+                motor.speed_pid_handler.sum_maximum = int32_to_float(receive_int32);
                 break;
 
             case 0x87:
                 /* 0x87 used to set angle pid kp */
                 receive_int32 = (data[4] << 24) | (data[5] << 16) | (data[6] << 8) | data[7];
-                angle_pid_handler.kp = int32_to_float(receive_int32);
+                motor.angle_pid_handler.kp = int32_to_float(receive_int32);
                 break;
 
             case 0x96:
                 /* 0x96 used to set angle pid ki */
                 receive_int32 = (data[4] << 24) | (data[5] << 16) | (data[6] << 8) | data[7];
-                angle_pid_handler.ki = int32_to_float(receive_int32);
+                motor.angle_pid_handler.ki = int32_to_float(receive_int32);
                 break;
 
             case 0xA5:
                 /* 0xA5 used to set angle pid kd */
                 receive_int32 = (data[4] << 24) | (data[5] << 16) | (data[6] << 8) | data[7];
-                angle_pid_handler.kd = int32_to_float(receive_int32);
+                motor.angle_pid_handler.kd = int32_to_float(receive_int32);
                 break;
 
             case 0xB4:
                 /* 0xB4 used to set angle pid summary maximum */
                 receive_int32 = (data[4] << 24) | (data[5] << 16) | (data[6] << 8) | data[7];
-                angle_pid_handler.sum_maximum = int32_to_float(receive_int32);
+                motor.angle_pid_handler.sum_maximum = int32_to_float(receive_int32);
                 break;
 
             case 0xC3:
@@ -126,7 +126,7 @@ void mdtp_callback_handler(unsigned char pid, const unsigned char *data) {
             case 0xD2:
                 /* 0xD2 used to write byte to flash */
                 minifoc_fsm_state = 5;
-                pid_parameter_available_flag = 1;
+                motor.pid_parameter_available_flag = 1;
                 break;
             default:break;
         }
@@ -148,18 +148,29 @@ int main(void) {
 
     /* configure filter and pid parameters for pid algorithm */
     filter_config();
-    pid_config(TORQUE_LOOP_CONTROL);
+    pid_config(MCT_torque);
+    motor_init();
 
     /* configure systick timer for delay_ms() function */
     systick_config();
 
     /* read all parameters from flash */
-    flash_read_parameters();
+    //flash_read_parameters();
 
     /* correct the mechanical angle zero deviation */
     encoder_zeroing();
 
+
     while (1) {
+        if(cmd_receive_finish()){
+            char * cmd = cmd_get_cmd();
+            //npf_printf("---> %s\n", cmd);
+            command_handle(cmd);
+            cmd_process_finish();
+            led_toggle();
+        }
+        motor_report();
+        continue;
         switch (minifoc_fsm_state) {
             case 1:
                 /* disable timer to stop foc calculate loop */
@@ -183,7 +194,7 @@ int main(void) {
 
                 /* configure timer for foc calculate loop */
                 timer2_config();
-                if (pid_control_mode_flag != TORQUE_LOOP_CONTROL)
+                if (motor.FOC_Struct.control_mod != TORQUE_LOOP_CONTROL)
                     timer13_config();
                 minifoc_fsm_state = 0;
                 break;
@@ -191,7 +202,7 @@ int main(void) {
             case 3:
                 /* disable timer to stop foc calculate loop */
                 timer2_disable();
-                if (pid_control_mode_flag != TORQUE_LOOP_CONTROL)
+                if (motor.FOC_Struct.control_mod != TORQUE_LOOP_CONTROL)
                     timer13_disable();
                 minifoc_fsm_state = 0;
                 break;

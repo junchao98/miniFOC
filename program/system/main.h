@@ -29,5 +29,8 @@
 #include "filter.h"
 #include "pid.h"
 #include "report.h"
+#include "motor.h"
+#include "nanoprintf.h"
 
+#include "commander.h"
 #endif  // MINIFOC_MAIN_H_
