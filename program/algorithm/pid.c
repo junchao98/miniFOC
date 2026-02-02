@@ -36,8 +36,8 @@ void pid_config(unsigned char mode) {
     motor.speed_pid_handler.minimum = -1.0f;
 
     motor.speed_pid_handler.kp = 0.06f;
-    motor.speed_pid_handler.ki = 0.04f;
-    motor.speed_pid_handler.kd = 0.02f;
+    motor.speed_pid_handler.ki = 0.01f;
+    motor.speed_pid_handler.kd = 0.00f;
     motor.speed_pid_handler.sum_maximum = 500;
 
     /* set maximum and minimum output speed */
@@ -45,8 +45,8 @@ void pid_config(unsigned char mode) {
     motor.angle_pid_handler.minimum = -100.0f;
 
     motor.angle_pid_handler.kp = 10.0f;
-    motor.angle_pid_handler.ki = 0.4f;
-    motor.angle_pid_handler.kd = 0.1f;
+    motor.angle_pid_handler.ki = 0.0f;
+    motor.angle_pid_handler.kd = 0.0f;
 }
 
 /*!

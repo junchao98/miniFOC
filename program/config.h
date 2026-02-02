@@ -10,7 +10,7 @@
 #define MINIFOC__CONFIG_H_
 
 /*! \brief bus voltage is 8.0V */
-#define VBUS            10.0f
+#define VBUS            12.0f
 /*! \brief set BLDC polar pairs to 7 */
 #define POLAR_PAIRS     7
 /*! \brief SC60228 resolution is 2^8 = 4096 */
