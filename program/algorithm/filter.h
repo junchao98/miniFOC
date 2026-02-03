@@ -18,6 +18,7 @@ typedef struct {
     float coefficient2;     ///< low-pass filter coefficient 2
     float last_result;      ///< previous calculation results of low-pass filter
     float current_result;   ///< current calculation results of low-pass filter
+    float time_const;
 } Filter_Structure_t;
 
 float filter_update_value(Filter_Structure_t *param, short value);

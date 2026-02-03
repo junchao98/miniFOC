@@ -255,8 +255,8 @@ void cmd_motion(char *user_cmd, char *separator)
         switch (sub_cmd) {
         case SCMD_DOWNSAMPLE:
             printVerbose(F(" downsample: "));
-            //if(!GET) motor->motion_downsample = value;
-            println("100");
+            if(!GET) motor.motion_downsample = value;
+            npf_printf("%d\n",  motor.motion_downsample);
           break;
 
             break;

@@ -14,6 +14,10 @@
 #define _MON_VEL    0b0000010 // monitor velocity value
 #define _MON_ANGLE  0b0000001 // monitor angle value
 
+// default monitor downsample
+#define DEF_MON_DOWNSMAPLE 100 //!< default monitor downsample
+#define DEF_MOTION_DOWNSMAPLE 0 //!< default motion downsample - disable
+
 
 typedef struct{
     PID_Structure_t speed_pid_handler; 
@@ -23,6 +27,7 @@ typedef struct{
     float target;
     unsigned int monitor_downsample;
     unsigned char enabled;
+    unsigned char motion_downsample;
 /*!
     \brief motor phase sequence flag variable
 */

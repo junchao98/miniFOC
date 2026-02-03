@@ -27,6 +27,7 @@ void filter_coefficient_config(Filter_Structure_t *param, float cutoff_freq, flo
 
     /* the RC time constant is calculated from the cut-off frequency */
     float time_const = 1.0f / (6.2831852f * cutoff_freq);
+    param->time_const = time_const;
 
     /* calculation of digital low-pass filter coefficients */
     param->coefficient1 = (1.0f / (1.0f + time_const * sample_freq)) * coefficient;

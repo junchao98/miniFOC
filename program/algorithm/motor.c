@@ -30,7 +30,8 @@ void motor_init(void)
     motor.FOC_Struct.user_expect = 0;
 
     motor.monitor_variables = _MON_TARGET | _MON_VOLT_Q | _MON_VEL | _MON_ANGLE; //!< Bit array holding the map of variables the user wants to monitor
-    motor.monitor_downsample = 100;
+    motor.monitor_downsample = DEF_MON_DOWNSMAPLE; //!< show monitor outputs each monitor_downsample calls
+    motor.motion_downsample = DEF_MOTION_DOWNSMAPLE; //!< parameter defining the ratio of downsampling for move commad
 }
 
 void motor_report(void)
