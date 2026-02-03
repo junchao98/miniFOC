@@ -17,7 +17,7 @@ void motor_init(void)
 {
     motor.FOC_Struct.vbus = VBUS;
     motor.FOC_Struct.pwmmod = USE_SVPWM;
-    motor.FOC_Struct.control_mod = MCT_torque;
+    motor.FOC_Struct.control_mod = MCT_velocity;
     motor.FOC_Struct.rotate_speed = 0;
     motor.phase_sequence = 0;
     motor.foc_parameter_available_flag = 1;
@@ -102,17 +102,17 @@ void motor_report(void)
 void motor_enable(void)
 {
     /* delay to wait for the motor to respond */
-    delayms(1000);
+    // delayms(1000);
 
     /* configure timer for foc calculate loop */
     timer2_config();
-    if (motor.FOC_Struct.control_mod != TORQUE_LOOP_CONTROL)
+    if (motor.FOC_Struct.control_mod != MCT_velocity_openloop)
         timer13_config();
 }
 
 void motor_disable(void)
 {
     timer2_disable();
-    if (motor.FOC_Struct.control_mod != TORQUE_LOOP_CONTROL)
+    if (motor.FOC_Struct.control_mod != MCT_velocity_openloop)
         timer13_disable();
 }

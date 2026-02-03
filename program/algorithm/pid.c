@@ -34,17 +34,18 @@ void pid_config(unsigned char mode) {
     /* set maximum and minimum output torque */
     motor.speed_pid_handler.maximum = 1.0f;
     motor.speed_pid_handler.minimum = -1.0f;
+    motor.speed_pid_handler.sum_maximum = 500;
 
-    motor.speed_pid_handler.kp = 0.06f;
+    motor.speed_pid_handler.kp = 0.3f;
     motor.speed_pid_handler.ki = 0.01f;
     motor.speed_pid_handler.kd = 0.00f;
-    motor.speed_pid_handler.sum_maximum = 500;
 
     /* set maximum and minimum output speed */
     motor.angle_pid_handler.maximum = 100.0f;
     motor.angle_pid_handler.minimum = -100.0f;
+    motor.angle_pid_handler.sum_maximum = 100;
 
-    motor.angle_pid_handler.kp = 10.0f;
+    motor.angle_pid_handler.kp = 3.0f;
     motor.angle_pid_handler.ki = 0.0f;
     motor.angle_pid_handler.kd = 0.0f;
 }
@@ -61,7 +62,8 @@ float pid_calculate_result(PID_Structure_t *pid_handler, float collect) {
 
     /* calculate the integral and realize anti integral saturation */
     pid_handler->summary = pid_handler->summary + error;
-    pid_handler->summary = fast_constrain(pid_handler->summary, -pid_handler->sum_maximum, pid_handler->sum_maximum);
+    // pid_handler->summary = 1;
+    // pid_handler->summary = fast_constrain(pid_handler->summary, -pid_handler->sum_maximum, pid_handler->sum_maximum);
 
     /* calculate PID output value */
     current_result = pid_handler->kp * error + pid_handler->ki * pid_handler->summary

@@ -12,13 +12,6 @@
 
 #include <stdint.h>
 
-/*! \brief torque loop control mode */
-#define TORQUE_LOOP_CONTROL     1
-/*! \brief speed loop control mode */
-#define SPEED_LOOP_CONTROL      2
-/*! \brief angle loop control mode */
-#define ANGLE_LOOP_CONTROL      3
-
 /*!
   \struct PID_Structure_t
   \brief  structure of PID algorithm
